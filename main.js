@@ -1,5 +1,5 @@
 const firebaseConfig = {
-    apiKey: "AIzaSyDIkjIi5fHsCOK-Vr44t8QTfAOg3w3jNfo",
+    apiKey: "API_KEY",
     authDomain: "dinodance-2bde2.firebaseapp.com",
     projectId: "dinodance-2bde2",
     // ...
