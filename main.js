@@ -26,6 +26,10 @@ let colorAa = '#ffc832';
 let colorBa = '#ffc832';
 let colorCa = '#ffc832';
 let colorSTART = 245;
+let volumeLevel = 1.0; // Volume control variable
+let volumeButtonColor = '#f5f5f5'; // Volume button color variable
+let isMuted = false; // Track mute state
+let speakerSize = 24; // Size of the speaker icon
 // Music Choice:
 let musicDisco;
 let musicRock;
@@ -233,6 +237,87 @@ function draw() {
     fill(245);
     textSize(20)
     text("A game by Jhane Rose Sadicon", width - 160, 30);
+    
+    // Exit settings:
+    textFont(font);
+    textSize(20)
+    textAlign(LEFT)
+    fill(255, 200, 50);
+    text("Press ESC to exit game", 20, 30);
+    
+    // Speaker Volume Icon - moved under ESC text
+    push(); // Save current drawing state
+    translate(20, 42); // New position under ESC text
+    scale(1.5); // Keep the same size
+    
+    // Draw speaker icon and volume control
+    fill(volumeButtonColor);
+    noStroke();
+    
+    // Speaker body
+    beginShape();
+    vertex(0, 5);
+    vertex(8, 5);
+    vertex(8, 15);
+    vertex(0, 15);
+    endShape(CLOSE);
+    
+    // Speaker cone
+    beginShape();
+    vertex(8, 5);
+    vertex(15, 0);
+    vertex(15, 20);
+    vertex(8, 15);
+    endShape(CLOSE);
+
+    if (isMuted) {
+        // X mark for mute
+        stroke(volumeButtonColor);
+        strokeWeight(2);
+        line(20, 5, 30, 15);
+        line(30, 5, 20, 15);
+    } else {
+        // Volume slider background - moved further right
+        noStroke();
+        fill(89, 89, 89, 100);
+        rect(35, 8, 30, 4, 2);
+        
+        // Volume slider fill
+        fill(volumeButtonColor);
+        rect(35, 8, 30 * volumeLevel, 4, 2);
+        
+        // Volume slider handle
+        circle(35 + (30 * volumeLevel), 10, 8);
+        
+        // Volume level indicator - adjusted position
+        noFill();
+        stroke(volumeButtonColor);
+        strokeWeight(2);
+        
+        if (volumeLevel >= 0.3) {
+            arc(25, 10, 8, 8, -PI/3, PI/3);
+        }
+        if (volumeLevel >= 0.6) {
+            arc(25, 10, 12, 12, -PI/3, PI/3);
+        }
+        if (volumeLevel >= 0.9) {
+            arc(25, 10, 16, 16, -PI/3, PI/3);
+        }
+    }
+
+    // Hover tooltip - adjusted position
+    if (mouseX >= 20 && mouseX <= 20 + (45 * 1.5) && 
+        mouseY >= 42 - 15 && mouseY <= 42 + (30 * 1.5)) {
+        fill(0, 0, 0, 200);
+        noStroke();
+        rect(45, -5, 100, 20, 5);
+        fill(255);
+        textSize(8);
+        textAlign(LEFT, CENTER);
+        text(isMuted ? "Click to unmute" : "Click sound to mute", 50, 5);
+    }
+    
+    pop(); // Restore drawing state
 }
 
 function keyPressed() {
@@ -347,6 +432,67 @@ function mouseClicked() {
             game.foreground.player2Input.show();
         }
     }
+    // Volume Control Click Handler
+    let speakerX = 20;
+    let speakerY = 42;
+    let iconWidth = 25 * 1.5; // Reduced to just cover the speaker icon
+    let sliderX = speakerX + 52.5; // Starting position of slider
+    let sliderWidth = 45;
+    
+    // Check if click is on the speaker icon (mute/unmute)
+    if (mouseX >= speakerX && mouseX <= speakerX + iconWidth && 
+        mouseY >= speakerY - 5 && mouseY <= speakerY + (30 * 1.5)) {
+        // Toggle mute
+        isMuted = !isMuted;
+        if (isMuted) {
+            volumeLevel = Math.max(0.3, volumeLevel);
+            setAllVolumes(0);
+        } else {
+            setAllVolumes(volumeLevel);
+        }
+        gameChoose.play();
+    }
+    // Check if click is on the slider area
+    else if (!isMuted && 
+        mouseX >= sliderX && mouseX <= sliderX + sliderWidth && 
+        mouseY >= speakerY - 5 && mouseY <= speakerY + (30 * 1.5)) {
+        // Adjust volume
+        let newVolume = constrain((mouseX - sliderX) / sliderWidth, 0, 1);
+        volumeLevel = Math.max(0.3, newVolume);
+        setAllVolumes(volumeLevel);
+        gameChoose.play();
+    }
+}
+
+function mouseMoved() {
+    // Volume Control Hover
+    let speakerX = 20;
+    let speakerY = 42;
+    let iconWidth = 25 * 1.5;
+    let sliderX = speakerX + 52.5;
+    let sliderWidth = 45;
+    
+    // Check if mouse is over either the speaker icon or slider
+    if ((mouseX >= speakerX && mouseX <= speakerX + iconWidth && 
+         mouseY >= speakerY - 5 && mouseY <= speakerY + (30 * 1.5)) ||
+        (!isMuted && mouseX >= sliderX && mouseX <= sliderX + sliderWidth && 
+         mouseY >= speakerY - 5 && mouseY <= speakerY + (30 * 1.5))) {
+        volumeButtonColor = '#89ff89';
+        cursor('assets/Cursor/BlueCursor.cur');
+    } else {
+        volumeButtonColor = '#f5f5f5';
+        // Don't reset cursor here as other elements might need it
+    }
+}
+
+// Helper function to set volume for all audio elements
+function setAllVolumes(level) {
+    musicDisco.setVolume(level);
+    musicRock.setVolume(level);
+    musicRnB.setVolume(level);
+    startNoise.setVolume(level);
+    gameChoose.setVolume(level);
+    errorNoise.setVolume(level);
 }
 
 // Add window unload handler to clean up input fields
