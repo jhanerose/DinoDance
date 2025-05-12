@@ -34,6 +34,9 @@ let musicRnB;
 let gameSeconds = 0;
 let gameTimer;
 let totalGameTime = 64; // Total duration of the game in seconds (will be updated based on song choice)
+// Volume Control:
+let currentVolume = 1.0; // Default volume (max)
+let isVolumeHovered = false;
 
 
 function preload() {
@@ -233,6 +236,53 @@ function draw() {
     fill(245);
     textSize(20)
     text("A game by Jhane Rose Sadicon", width - 160, 30);
+
+    // Add volume control
+    if (gameScreen === "play" || gameScreen === "home") {
+        // Speaker icon
+        fill(255);
+        noStroke();
+        rect(width - 250, 55, 8, 15); // Moved down to align with timer
+        beginShape(); // Speaker cone
+        vertex(width - 242, 55);
+        vertex(width - 232, 50);
+        vertex(width - 232, 75);
+        vertex(width - 242, 70);
+        endShape(CLOSE);
+        
+        // Add sound waves for visual effect
+        if (currentVolume > 0) {
+            noFill();
+            stroke(255);
+            strokeWeight(1.5);
+            arc(width - 229, 62, 8, 12, -PI/3, PI/3);  // Adjusted y-position
+            if (currentVolume > 0.3) {
+                arc(width - 225, 62, 12, 18, -PI/3, PI/3);
+            }
+            if (currentVolume > 0.6) {
+                arc(width - 221, 62, 16, 24, -PI/3, PI/3);
+            }
+        }
+        
+        // Volume bar background
+        noStroke();
+        fill(89, 89, 89, 200);
+        rect(width - 210, 58, 70, 8, 4); // Adjusted y-position
+        
+        // Volume bar fill
+        fill(255, 200, 50);
+        rect(width - 210, 58, 70 * currentVolume, 8, 4);
+        
+        // Check if mouse is over volume bar
+        if (mouseX >= width - 210 && mouseX <= width - 140 &&
+            mouseY >= 58 && mouseY <= 66) {
+            isVolumeHovered = true;
+            cursor('assets/Cursor/BlueCursor.cur');
+        } else if (isVolumeHovered) {
+            isVolumeHovered = false;
+            cursor('assets/Cursor/GreenCursor.cur');
+        }
+    }
 }
 
 function keyPressed() {
@@ -346,6 +396,38 @@ function mouseClicked() {
             game.foreground.player1Input.show(); // Show input fields again
             game.foreground.player2Input.show();
         }
+    }
+}
+
+function mousePressed() {
+    // Volume control click handler
+    if (mouseX >= width - 210 && mouseX <= width - 140 &&
+        mouseY >= 58 && mouseY <= 66) {
+        currentVolume = (mouseX - (width - 210)) / 70;
+        currentVolume = constrain(currentVolume, 0, 1);
+        // Update all music volumes
+        musicDisco.setVolume(currentVolume);
+        musicRock.setVolume(currentVolume);
+        musicRnB.setVolume(currentVolume);
+        startNoise.setVolume(currentVolume);
+        gameChoose.setVolume(currentVolume);
+        errorNoise.setVolume(currentVolume);
+    }
+}
+
+function mouseDragged() {
+    // Volume control drag handler
+    if (mouseX >= width - 210 && mouseX <= width - 140 &&
+        mouseY >= 58 && mouseY <= 66) {
+        currentVolume = (mouseX - (width - 210)) / 70;
+        currentVolume = constrain(currentVolume, 0, 1);
+        // Update all music volumes
+        musicDisco.setVolume(currentVolume);
+        musicRock.setVolume(currentVolume);
+        musicRnB.setVolume(currentVolume);
+        startNoise.setVolume(currentVolume);
+        gameChoose.setVolume(currentVolume);
+        errorNoise.setVolume(currentVolume);
     }
 }
 
